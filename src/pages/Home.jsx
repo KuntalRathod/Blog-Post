@@ -3,7 +3,7 @@ import { Container, PostCard } from '../components';
 import appwriteService from "../appwrite/config";
 import CircularProgress from '@mui/material/CircularProgress';
 
-function AllPosts() {
+function Home() {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -73,4 +73,4 @@ function AllPosts() {
     );
 }
 
-export default AllPosts;
+export default Home;
