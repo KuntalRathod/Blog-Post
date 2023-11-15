@@ -1,20 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { Container, PostCard } from '../components';
-import appwriteService from "../appwrite/config";
+import appwriteService from '../appwrite/config';
 import CircularProgress from '@mui/material/CircularProgress';
-
 
 function AllPosts() {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        appwriteService.getPosts([]).then((fetchedPosts) => {
-            if (fetchedPosts) {
-                setPosts(fetchedPosts.documents);
+        const fetchPosts = async () => {
+            try {
+                const user = await appwriteService.getCurrentUser();
+                if (user) {
+                    const userId = user.$id;
+                    const fetchedPosts = await appwriteService.getPosts({ filters: [`userId=${userId}`] });
+
+                    if (fetchedPosts) {
+                        setPosts(fetchedPosts.documents);
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching posts:', error);
+            } finally {
                 setLoading(false);
             }
-        });
+        };
+
+        fetchPosts();
     }, []);
 
     if (loading) {
@@ -23,7 +35,7 @@ function AllPosts() {
                 <Container>
                     {/* Display a loading spinner */}
                     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
-                        <CircularProgress /> {/* Use any loading spinner component here */}
+                        <CircularProgress />
                     </div>
                 </Container>
             </div>
