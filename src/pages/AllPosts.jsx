@@ -2,31 +2,37 @@ import React, { useState, useEffect } from 'react';
 import { Container, PostCard } from '../components';
 import appwriteService from '../appwrite/config';
 import CircularProgress from '@mui/material/CircularProgress';
+import authService from '../appwrite/auth';
 
 function AllPosts() {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+
 
     useEffect(() => {
-        const fetchPosts = async () => {
+        const fetchData = async () => {
             try {
-                const user = await appwriteService.getCurrentUser();
-                if (user) {
-                    const userId = user.$id;
-                    const fetchedPosts = await appwriteService.getPosts({ filters: [`userId=${userId}`] });
+                const user = await authService.getCurrentUser();
+                const userLoggedIn = !!user;
+                setIsLoggedIn(userLoggedIn);
 
-                    if (fetchedPosts) {
-                        setPosts(fetchedPosts.documents);
-                    }
+                if (!userLoggedIn) {
+                    return; // Don't proceed with fetching posts if not logged in
+                }
+
+                const fetchedPosts = await appwriteService.getPosts([]);
+                if (fetchedPosts) {
+                    setPosts(fetchedPosts.documents);
                 }
             } catch (error) {
-                console.error('Error fetching posts:', error);
+                console.error('Error fetching data:', error);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchPosts();
+        fetchData();
     }, []);
 
     if (loading) {

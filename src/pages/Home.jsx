@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, PostCard } from '../components';
 import appwriteService from "../appwrite/config";
 import CircularProgress from '@mui/material/CircularProgress';
+import authService from '../appwrite/auth';
 
 function Home() {
     const [posts, setPosts] = useState([]);
@@ -11,14 +12,17 @@ function Home() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const user = await appwriteService.getCurrentUser();
-                setIsLoggedIn(!!user);
+                const user = await authService.getCurrentUser();
+                const userLoggedIn = !!user;
+                setIsLoggedIn(userLoggedIn);
 
-                if (isLoggedIn) {
-                    const fetchedPosts = await appwriteService.getPosts([]);
-                    if (fetchedPosts) {
-                        setPosts(fetchedPosts.documents);
-                    }
+                if (!userLoggedIn) {
+                    return; // Don't proceed with fetching posts if not logged in
+                }
+
+                const fetchedPosts = await appwriteService.getPosts([]);
+                if (fetchedPosts) {
+                    setPosts(fetchedPosts.documents);
                 }
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -28,7 +32,8 @@ function Home() {
         };
 
         fetchData();
-    }, [isLoggedIn]);
+    }, []); // Removed isLoggedIn from the dependency array
+
 
     if (loading) {
         return (
