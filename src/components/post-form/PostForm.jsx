@@ -1,14 +1,12 @@
-import React, { useState, useCallback } from "react";
+import React, { useCallback, useState } from "react";
+import { useForm } from "react-hook-form";
 import { Button, Input, RTE, Select } from "..";
 import appwriteService from "../../appwrite/config";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { useForm } from "react-hook-form";
 import CircularProgress from "@mui/material/CircularProgress";
 
 export default function PostForm({ post }) {
-    const [loading, setLoading] = useState(false); // State to control the loading indicator
-
     const { register, handleSubmit, watch, setValue, control, getValues } = useForm({
         defaultValues: {
             title: post?.title || "",
@@ -20,10 +18,12 @@ export default function PostForm({ post }) {
 
     const navigate = useNavigate();
     const userData = useSelector((state) => state.auth.userData);
+    const [loading, setLoading] = useState(false);
 
     const submit = async (data) => {
-        setLoading(true); // Set loading state to true upon form submission
         try {
+            setLoading(true);
+
             if (post) {
                 const file = data.image[0] ? await appwriteService.uploadFile(data.image[0]) : null;
 
@@ -31,7 +31,7 @@ export default function PostForm({ post }) {
                     appwriteService.deleteFile(post.featuredImage);
                 }
 
-                const dbPost = await appwriteService.updatePost(post.$id, {
+                const dbPost = await appwriteService.updatePost(post?.$id, {
                     ...data,
                     featuredImage: file ? file.$id : undefined,
                 });
@@ -52,10 +52,8 @@ export default function PostForm({ post }) {
                     }
                 }
             }
-        } catch (error) {
-            // Handle errors
         } finally {
-            setLoading(false); // Set loading state back to false after the operation completes
+            setLoading(false);
         }
     };
 
@@ -87,7 +85,6 @@ export default function PostForm({ post }) {
                     label="Title :"
                     placeholder="Title"
                     className="mb-4"
-                    autoComplete="title"
                     {...register("title", { required: true })}
                 />
                 <Input
@@ -124,10 +121,9 @@ export default function PostForm({ post }) {
                     className="mb-4"
                     {...register("status", { required: true })}
                 />
-                <Button type="submit" bgColor={post ? "bg-green-500" : undefined} className="w-full">
-                    {post ? "Update" : "Submit"}
+                <Button type="submit" bgColor={post ? "bg-green-500" : undefined} className="w-full" disabled={loading}>
+                    {loading ? <CircularProgress size={24} color="inherit" /> : post ? "Update" : "Submit"}
                 </Button>
-                {loading && <CircularProgress style={{ position: "absolute", top: "50%", left: "50%" }} />} {/* Show loading indicator */}
             </div>
         </form>
     );

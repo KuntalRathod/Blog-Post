@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Container, PostCard } from '../components';
+
+import React, { useEffect, useState } from 'react'
 import appwriteService from "../appwrite/config";
+import { Container, PostCard } from '../components'
 import CircularProgress from '@mui/material/CircularProgress';
 import authService from '../appwrite/auth';
 
@@ -12,33 +13,37 @@ function Home() {
     useEffect(() => {
         const fetchData = async () => {
             try {
+                console.log('Fetching data...');
                 const user = await authService.getCurrentUser();
                 const userLoggedIn = !!user;
                 setIsLoggedIn(userLoggedIn);
 
                 if (!userLoggedIn) {
-                    return; // Don't proceed with fetching posts if not logged in
+                    return;
                 }
 
                 const fetchedPosts = await appwriteService.getPosts([]);
                 if (fetchedPosts) {
+                    console.log('Data fetched successfully:', fetchedPosts.documents);
                     setPosts(fetchedPosts.documents);
                 }
             } catch (error) {
                 console.error('Error fetching data:', error);
             } finally {
+                console.log('Setting loading to false.');
                 setLoading(false);
             }
         };
 
         fetchData();
-    }, []); // Removed isLoggedIn from the dependency array
+    }, []);      //moved isLoggedIn from the dependency array
 
 
     if (loading) {
         return (
             <div className='w-full py-8'>
                 <Container>
+                    {/* Display a loading spinner */}
                     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
                         <CircularProgress />
                     </div>
@@ -47,7 +52,9 @@ function Home() {
         );
     }
 
-    if (!isLoggedIn) {
+
+
+    if (posts.length === 0) {
         return (
             <div className="w-full py-8 mt-4 text-center">
                 <Container>
@@ -60,9 +67,8 @@ function Home() {
                     </div>
                 </Container>
             </div>
-        );
+        )
     }
-
     return (
         <div className='w-full py-8'>
             <Container>
@@ -75,7 +81,7 @@ function Home() {
                 </div>
             </Container>
         </div>
-    );
+    )
 }
 
-export default Home;
+export default Home

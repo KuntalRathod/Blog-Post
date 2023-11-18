@@ -9,7 +9,6 @@ function AllPosts() {
     const [loading, setLoading] = useState(true);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -33,7 +32,8 @@ function AllPosts() {
         };
 
         fetchData();
-    }, []);
+    }, []); // Removed isLoggedIn from the dependency array
+
 
     if (loading) {
         return (
@@ -74,3 +74,4 @@ function AllPosts() {
 }
 
 export default AllPosts;
+

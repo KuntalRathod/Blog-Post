@@ -4,17 +4,21 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Container, Button } from '../components';
 import { useSelector } from 'react-redux';
 import parse from 'html-react-parser';
+import CircularProgress from '@mui/material/CircularProgress';
 
 const Post = () => {
     const [post, setPost] = useState(null);
+    const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
     const { slug } = useParams();
 
     const userData = useSelector((state) => state.auth.userData);
-
     const isAuthor = post && userData ? post.userId === userData.$id : false;
 
+
     useEffect(() => {
+        setLoading(true);
+
         if (slug) {
             appwriteService.getPost(slug).then((post) => {
                 if (post) {
@@ -22,12 +26,17 @@ const Post = () => {
                 } else {
                     navigate('/');
                 }
+            }).catch((error) => {
+                console.error('Error fetching data:', error);
+                // Handle error, and also set loading to false
+            }).finally(() => {
+                setLoading(false);
             });
-        }
-        else {
+        } else {
             navigate('/');
+            setLoading(false);
         }
-    }, [slug, navigate]);
+    }, [slug, navigate, userData]);
 
     const deletePost = () => {
         appwriteService.deletePost(post.$id).then((status) => {
@@ -37,6 +46,15 @@ const Post = () => {
             }
         });
     };
+
+    if (loading) {
+        return (
+            <div className="loading-spinner">
+                <CircularProgress />
+            </div>
+        );
+    }
+
     return post ? (
         <div className="py-8">
             <Container>
@@ -47,16 +65,20 @@ const Post = () => {
                         className="rounded-xl"
                     />
 
-                    {isAuthor && (
+                    {post.userId && userData && (
                         <div className="absolute right-6 top-6">
-                            <Link to={`/edit-post/${post.$id}`}>
-                                <Button bgColor="bg-green-500" className="mr-3">
-                                    Edit
-                                </Button>
-                            </Link>
-                            <Button bgColor="bg-red-500" onClick={deletePost}>
-                                Delete
-                            </Button>
+                            {isAuthor && (
+                                <>
+                                    <Link to={`/edit-post/${post.$id}`}>
+                                        <Button bgColor="bg-green-500" className="mr-3">
+                                            Edit
+                                        </Button>
+                                    </Link>
+                                    <Button bgColor="bg-red-500" onClick={deletePost}>
+                                        Delete
+                                    </Button>
+                                </>
+                            )}
                         </div>
                     )}
                 </div>
