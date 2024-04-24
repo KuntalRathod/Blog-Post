@@ -1,9 +1,14 @@
-import React from 'react'
-
-const Logo = ({width = '100px'}) => {
+import React from "react";
+import logo from "../../public/images/logo.png";
+const Logo = ({ width = "100px", invert = true, className }) => {
   return (
-    <div>Logo</div>
-  )
-}
+    <img
+      className={`${invert && "invert"} ${className} `}
+      src={logo}
+      width={width}
+      alt="Logo"
+    />
+  );
+};
 
-export default Logo
+export default Logo;
