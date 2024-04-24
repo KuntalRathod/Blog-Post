@@ -98,7 +98,7 @@ const Footer = () => {
         <hr className="my-6 sm:mx-auto border-gray-700 lg:my-8" />
         <div className="sm:flex text-center sm:items-center sm:justify-between">
           <span className="text-sm sm:text-center text-gray-500">
-            © 2024 BlogPost™. All Rights Reserved. Created by{" "}
+            @{new Date().getFullYear()} BlogPost™. All Rights Reserved. Created by{" "}
             <a
               target="_blank"
               href=""
